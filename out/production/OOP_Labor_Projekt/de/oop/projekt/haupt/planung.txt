@@ -1,0 +1,12 @@
+Vererbung - check
+Was muss beim Arzt noch gemacht werden? Stichpunkt serialisieren
+    - Attribute: Arbeitsadresse
+    - ein Arztcontainer -- d.h. Liste in der Ärzte hinzugefügt, gesucht, gelöscht und in ihren Attributwerten verändert werden können
+
+ArztContainer -> Andrea
+Alles auf Englisch umschreiben
+
+
+Was muss bei allen Personen gemacht werden? Stichpunkt serialisieren
+- Geschlecht als Attribut hinzufügen
+-

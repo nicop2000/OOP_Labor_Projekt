@@ -1,0 +1,46 @@
+Vererbung - check
+Was muss beim Arzt noch gemacht werden? Stichpunkt serialisieren
+    - Attribute: Arbeitsadresse
+    - ein Arztcontainer -- d.h. Liste in der Ärzte hinzugefügt, gesucht, gelöscht und in ihren Attributwerten verändert werden können
+
+ArztContainer -> Andrea
+    suchmethoden
+        arzt nachname
+            arzt fachgebiet
+            arzt id
+            arzt date
+    hinzufügen
+    löschen (hängt mit suchen zusammen)
+    update (getter und setter)
+
+Alles auf Englisch umschreiben -> Nico CHECK
+
+Geschlecht-Enum -> Andrea
+
+TestpersonContainer fertigstellen -> Finn
+    suchmethoden
+        testperson date
+        testperson id
+
+nach suchen mehrere personen angeben wenn mehrere vorhanden -> Finn & Nico
+
+
+Field-Validator add new Persons
+
+toString überall verbessern/verschönern
+
+gui -> Nico
+    export knopf
+
+    //momentan dauerhafter export und import
+
+- Geschlecht als Attribut hinzufügen Testperson, Arzt -> Vererbung -> Andrea
+
+Dokumentation -> Finn
+
+Tests -> Nico
+
+final und private wo es geht (Überprüfen)
+Parameter auf private prüfen
+
+!!!CODE KOMMENTIEREN!!!
