@@ -19,18 +19,8 @@ class StudyTest {
     Doctor thorsen = new Doctor("Dr.", "Nana", "Thorsen", "M.D.", new Date(23, 5, 1970), "Allgemeinmedizin", "weiblich");
     Doctor karev = new Doctor("Dr.", "Alex", "Karev", "M.D., F.A.C.S", new Date(1, 5, 1980), "Pediatrician", "männlich");
 
-    DoctorContainer ac = DoctorContainer.getInstance();
-    @Test
-    void checkInstances() {
-        assertSame(ac, doctorContainer);
-        System.out.println(ac.hashCode());
-        System.out.println(doctorContainer.hashCode());
-        doctorContainer = Study.getInstance().getDoctorContainer();
-        testSubjectContainer = Study.getInstance().getTestSubjectContainer();
-        assertSame(doctorContainer, DoctorContainer.getInstance());
-        assertSame(testSubjectContainer, TestSubjectContainer.getInstance());
 
-    }
+
 
     @Test
     void personenVornamen() {

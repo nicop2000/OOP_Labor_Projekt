@@ -9,20 +9,6 @@ public class TestSubjectContainer implements Serializable {
 
 	private static TestSubjectContainer instance;
 
-	private TestSubjectContainer(){}
-
-	public synchronized static TestSubjectContainer getInstance() {
-		if (instance == null) {
-			instance = new TestSubjectContainer();
-		}
-		return instance;
-	}
-
-	public synchronized static void setInstance(TestSubjectContainer instanz) {
-		instance = instanz;
-
-	}
-
 	public List<TestSubject> getTestSubjectList() {
 		return testSubjectsList;
 	}

@@ -35,7 +35,7 @@ public abstract class Person implements Serializable {
     public String getGender(){return gender;}
 
     public Person setGender(String gender){
-        this.gender=gender;
+        this.gender = gender;
         return this;
     }
 

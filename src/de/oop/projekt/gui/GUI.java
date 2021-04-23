@@ -2,10 +2,7 @@ package de.oop.projekt.gui;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,10 +14,15 @@ import de.oop.projekt.main.*;
 
 public class GUI implements ActionListener {
 
+    Study myStudy = Study.getInstance();
+
     private TestSubject tS;
+    private String prevPanel;
     private Doctor doc;
     private boolean editing = false;
     JMenuItem exit = new JMenuItem("Exit");
+    JMenuItem changeTitle = new JMenuItem("Namen der Studie ändern");
+    JMenuItem save = new JMenuItem("Speichern");
     private List<JButton> buttonListMultipleSubjectsEdit = new ArrayList<>();
     private List<JButton> buttonListMultipleSubjectsDelete = new ArrayList<>();
     private List<JButton> buttonListMultipleDoctorsEdit = new ArrayList<>();
@@ -33,12 +35,12 @@ public class GUI implements ActionListener {
     private JButton doctorSaveButton = new JButton("Arzt speichern");
     private JButton exportButton = new JButton("Exportieren");
     private JFrame mainFrame = new JFrame();
+
     private JPanel startpagePanel = new JPanel();
     private JPanel newTestSubjectPanel = new JPanel();
     private JPanel newDoctorPanel = new JPanel();
     private JPanel rootPanel = new JPanel(new CardLayout());
     private JPanel personView = new JPanel();
-    private JButton backButton = new JButton("Zurück");
     private JButton switchToSearch = new JButton("Suchen");
     private JButton searchButton = new JButton("Suchen");
     private JButton editButtonTestSubject = new JButton("Testperson bearbeiten");
@@ -46,7 +48,9 @@ public class GUI implements ActionListener {
     private JButton deleteButtonTestSubject = new JButton("Testperson löschen");
     private JButton deleteButtonDoctor = new JButton("Arzt löschen");
 
-    private JButton importStudy = new JButton("Importieren");
+    private JSplitPane splitPane;
+
+    private JMenuItem importStudy = new JMenuItem("Importieren");
     private ButtonGroup searchButtonsGroup = new ButtonGroup();
     private ButtonGroup searchValueButtonsGroup = new ButtonGroup();
     private ButtonGroup genderButtonGroup = new ButtonGroup();
@@ -94,6 +98,14 @@ public class GUI implements ActionListener {
         return editing;
     }
 
+    public String getPrevPanel() {
+        return prevPanel;
+    }
+
+    public GUI setPrevPanel(String prevPanel) {
+        this.prevPanel = prevPanel;
+        return this;
+    }
 
     public GUI() {
         initialSetup();
@@ -101,14 +113,16 @@ public class GUI implements ActionListener {
         mainFrame.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent we) {
 
+                Object[] options = {"Nein, abbrechen", "Ja, nicht speichern und schließen"};
+
                 if (Study.getInstance().isChangesNotSaved()) {
-                    int result = JOptionPane.showConfirmDialog(mainFrame,
+                    int result = JOptionPane.showOptionDialog(mainFrame,
                             "Es gibt ungespeicherte Änderungen. Möchten Sie das Programm wirklich beenden?", "Achtung:",
-                            JOptionPane.YES_NO_OPTION);
-                    if (result == JOptionPane.YES_OPTION) {
+                            JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[0]);
+                    if (result == JOptionPane.NO_OPTION) {
                         exportData();
                         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                    } else if (result == JOptionPane.NO_OPTION) {
+                    } else if (result == JOptionPane.YES_OPTION) {
                         mainFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
                     }
                 } else {
@@ -122,22 +136,27 @@ public class GUI implements ActionListener {
     }
 
     void importAtStart() {
+        //TODO: MUSS NOCH GELÖSCHT WERDEN
         TestSubject nico1 = new TestSubject("Nico", "Petersen", new Date(7, 12, 2000), "männlich");
         TestSubject nico2 = new TestSubject("Nicoo", "Petersen", new Date(8, 3, 1936), "männlich");
         TestSubject nico3 = new TestSubject("Nicooo", "Petersen", new Date(28, 8, 1964), "männlich");
         TestSubject andrea = new TestSubject("Andrea", "Robitzsch", new Date(25, 6, 1986), "weiblich");
 
-        TestSubjectContainer.getInstance().addTestSubjectToList(nico1);
-        TestSubjectContainer.getInstance().addTestSubjectToList(nico2);
-        TestSubjectContainer.getInstance().addTestSubjectToList(nico3);
-        TestSubjectContainer.getInstance().addTestSubjectToList(andrea);
+        Study.getInstance().getTestSubjectContainer().addTestSubjectToList(nico1);
+        Study.getInstance().getTestSubjectContainer().addTestSubjectToList(nico2);
+        Study.getInstance().getTestSubjectContainer().addTestSubjectToList(nico3);
+        Study.getInstance().getTestSubjectContainer().addTestSubjectToList(andrea);
+        System.out.println(Study.getInstance().getTitle());
 
 
         try {
-            Serializer.writeToFile(Study.getInstance());
-            Serializer.readFromFile();
+//            Serializer.writeToFile(Study.getInstance());
+            Study.readFromFile();
             infoLblImport.setText("Import erfolgreich");
         } catch (IOException ioException) {
+            System.out.println(ioException.getMessage());
+            System.out.println(ioException.getCause());
+            System.out.println(ioException.getLocalizedMessage());
             infoLblImport.setText(ioException.getMessage());
         } catch (ClassNotFoundException classNotFoundException) {
             infoLblImport.setText(classNotFoundException.getMessage());
@@ -153,9 +172,10 @@ public class GUI implements ActionListener {
             String filenameImport = fileChooser.getSelectedFile().getName();
 
             try {
-                Serializer.readFromFile();
+                Study.readFromFile();
                 infoLblImport.setText("Import erfolgreich");
                 Study.getInstance().setChangesNotSaved(false);
+                mainFrame.setTitle(Study.getInstance().getTitle());
             } catch (IOException ioException) {
                 infoLblImport.setText(ioException.getMessage());
             } catch (ClassNotFoundException classNotFoundException) {
@@ -183,13 +203,9 @@ public class GUI implements ActionListener {
         if(e.getSource() == doctorSaveButton) {
             saveDoctor();
         }
-       if(e.getSource() == backButton) {
-           infoLblImport.setText("");
-           switchCards("startpage");
-       }
+
 
         if(e.getSource() == switchToSearch) {
-            searchPanel.add(backButton);
             switchCards("search");
         }
 
@@ -223,6 +239,7 @@ public class GUI implements ActionListener {
         for (int i = 0; i < buttonListMultipleSubjectsDelete.size(); i++) {
             if(e.getSource() == buttonListMultipleSubjectsDelete.get(i)) {
                 deletePerson(resultsTestSubjects.get(i));
+                switchCards("search");
             }
         }
 
@@ -239,9 +256,19 @@ public class GUI implements ActionListener {
             }
         }
 
+        if(e.getSource() == changeTitle) {
+            String newTitle = JOptionPane.showInputDialog(mainFrame,
+                    "Neuen Titel für die Studie eingeben",
+                    null);
+            System.out.println(newTitle);
+            
+            if(newTitle != null && newTitle != "") {
+                Study.getInstance().setTitle(newTitle);
+                mainFrame.setTitle(Study.getInstance().getTitle());
 
+            }
 
-
+        }
 
         if(e.getSource() == searchButton) {
 
@@ -274,6 +301,15 @@ public class GUI implements ActionListener {
             }
 
         }
+
+        if(e.getSource() != importStudy) {
+            infoLblImport.setText("");
+        }
+
+        if(e.getSource() == save) {
+            exportData();
+        }
+
     }
 
     private Date stringToDate(String dateAsString) {
@@ -300,15 +336,13 @@ public class GUI implements ActionListener {
 
     private void doctorSearchListing() {
 
-        if (resultsDoctor.size() != 0) {
+        if (resultsDoctor != null && resultsDoctor.size() != 0) {
             searchResultsDoctors(resultsDoctor);
         } else {
             errorLblEdit.setText("Kein Arzt gefunden!");
         }
 
     }
-    
-
 
     private void deletePerson(TestSubject t) {
         Study.getInstance().getTestSubjectContainer().removeTestSubjectFromList(t);
@@ -324,7 +358,6 @@ public class GUI implements ActionListener {
 
     private void editViewTestSubject(TestSubject t) {
         personFields();
-        newTestSubjectPanel.add(backButton);
         firstName.setText(t.getFirstName());
         lastName.setText(t.getLastName());
         birthdateDay.setText(String.valueOf(t.getDateOfBirth().getDay()));
@@ -336,7 +369,6 @@ public class GUI implements ActionListener {
 
     private void editViewDoctor(Doctor d) {
         doctorFields();
-        newDoctorPanel.add(backButton);
         firstName.setText(d.getFirstName());
         lastName.setText(d.getLastName());
         preTitle.setText(d.getPreTitle());
@@ -346,7 +378,7 @@ public class GUI implements ActionListener {
         postTitle.setText(d.getPostTitle());
         specialty.setText(d.getSpecialty());
         setEditing(true);
-        switchCards("newDoctor");
+        switchCards("personView");
     }
 
 
@@ -368,11 +400,9 @@ public class GUI implements ActionListener {
             personView.add(personString);
             personView.add(editButtonTestSubject);
             personView.add(deleteButtonTestSubject);
-            personView.add(backButton);
         } else {
             return;
         }
-        personView.add(backButton);
         switchCards("personView");
     }
 
@@ -396,12 +426,10 @@ public class GUI implements ActionListener {
             personView.add(doctorString);
             personView.add(editButtonDoctor);
             personView.add(deleteButtonDoctor);
-            personView.add(backButton);
             switchCards("personView");
         } else {
             return;
         }
-        personView.add(backButton);
         switchCards("personView");
     }
 
@@ -424,7 +452,15 @@ public class GUI implements ActionListener {
         newTestSubjectPanel.add(birthdateYear);
         newTestSubjectPanel.add(errorLbl);
         newTestSubjectPanel.add(testSubjectSaveButton);
-        newTestSubjectPanel.add(backButton);
+
+        genderButtonGroup.clearSelection();
+        firstName.setText("");
+        lastName.setText("");
+        birthdateDay.setText("");
+        birthdateMonth.setText("");
+        birthdateYear.setText("");
+        errorLbl.setText("");
+
     }
 
     private void doctorFields() {
@@ -452,13 +488,23 @@ public class GUI implements ActionListener {
         newDoctorPanel.add(specialty);
         newDoctorPanel.add(errorLbl);
         newDoctorPanel.add(doctorSaveButton);
-        newDoctorPanel.add(backButton);
+
+        preTitle.setText("");
+        firstName.setText("");
+        lastName.setText("");
+        postTitle.setText("");
+        birthdateDay.setText("");
+        birthdateMonth.setText("");
+        birthdateYear.setText("");
+        specialty.setText("");
+        errorLbl.setText("");
 
     }
 
     private void switchCards(String newCard) {
         CardLayout cards = (CardLayout) rootPanel.getLayout();
         cards.show(rootPanel, newCard);
+
     }
 
     private void saveTestSubject() {
@@ -483,10 +529,11 @@ public class GUI implements ActionListener {
             tS.setLastName(lastName.getText());
             errorLbl.setText("Testperson erfolgreich geändert");
             tS = null;
+            setEditing(false);
 
         } else {
             TestSubject newPerson = new TestSubject(firstName.getText(), lastName.getText(), birthdate, gender);
-            if (TestSubjectContainer.getInstance().addTestSubjectToList(newPerson)) {
+            if (Study.getInstance().getTestSubjectContainer().addTestSubjectToList(newPerson)) {
                 errorLbl.setText("Testperson erfolgreich hinzugefügt");
 
             }
@@ -503,7 +550,7 @@ public class GUI implements ActionListener {
     private boolean exportData() {
 
         try {
-            Serializer.writeToFile(Study.getInstance());
+            Study.writeToFile();
             return true;
         } catch (IOException e) {
             e.printStackTrace();
@@ -526,6 +573,7 @@ public class GUI implements ActionListener {
             return false;
         }
 
+
         return true;
 
     }
@@ -536,7 +584,6 @@ public class GUI implements ActionListener {
         if (!checkDateFields()) {
             return;
         }
-
 
         String gender = "";
         if(male.isSelected()) {
@@ -550,12 +597,13 @@ public class GUI implements ActionListener {
         int month = Integer.parseInt(birthdateMonth.getText());
         int year = Integer.parseInt(birthdateYear.getText());
         Date birthdate = new Date(day, month, year);
-        if(getEditing()) {
+        if(!getEditing()) {
 
             Doctor newDoctor = new Doctor(preTitle.getText(), firstName.getText(), lastName.getText(), postTitle.getText(), birthdate, specialty.getText(), gender);
-            if (DoctorContainer.getInstance().addDoctorToList(newDoctor)) {
+            if (Study.getInstance().getDoctorContainer().addDoctorToList(newDoctor)) {
                 errorLbl.setText("Arzt erfolgreich hinzugefügt");
-
+                genderButtonGroup.clearSelection();
+                setEditing(false);
             }
         } else {
             doc.setDateOfBirth(birthdate);
@@ -580,12 +628,25 @@ public class GUI implements ActionListener {
 
     private void setUpMenu() {
         JMenu file = new JMenu("Datei");
-        JMenu help = new JMenu("Help");
-        menubar.add(file);
-        menubar.add(help);
-        exit.addActionListener(this);
+        JMenu edit = new JMenu("Bearbeiten");
+        JMenu help = new JMenu("Hilfe");
 
+
+        exit.addActionListener(this);
+        changeTitle.addActionListener(this);
+        save.addActionListener(this);
+        save.setMnemonic('S');
+
+
+        file.add(save);
+        file.add(importStudy);
         file.add(exit);
+
+        edit.add(changeTitle);
+        menubar.add(file);
+        menubar.add(edit);
+        menubar.add(help);
+
     }
 
     private void initialSetup() {
@@ -626,7 +687,7 @@ public class GUI implements ActionListener {
         importStudy.addActionListener(this);
         deleteButtonTestSubject.addActionListener(this);
         deleteButtonDoctor.addActionListener(this);
-        backButton.addActionListener(this);
+
         //endregion
 
         searchValueButtonsGroup.add(searchForLastname);
@@ -653,19 +714,25 @@ public class GUI implements ActionListener {
         startpagePanel.add(importStudy);
         startpagePanel.add(infoLblImport);
 
-        rootPanel.add(startpagePanel, "startpage");
+//        rootPanel.add(startpagePanel, "startpage");
+        rootPanel.add(new JPanel(), "start");
         rootPanel.add(newTestSubjectPanel, "newTestSubject");
         rootPanel.add(newDoctorPanel, "newDoctor");
         rootPanel.add(searchPanel, "search");
         rootPanel.add(personView, "personView");
 
-        mainFrame.add(rootPanel, BorderLayout.CENTER);
+        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+                startpagePanel, rootPanel);
+
+
+
+        mainFrame.add(splitPane, BorderLayout.CENTER);
 //        mainFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
         mainFrame.setJMenuBar(menubar);
         setUpMenu();
 
-        mainFrame.setTitle("OOP-Projekt");
+        mainFrame.setTitle(Study.getInstance().getTitle());
         mainFrame.pack();
 
         mainFrame.setVisible(true);

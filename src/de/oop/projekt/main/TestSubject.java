@@ -24,7 +24,7 @@ public class TestSubject extends Person {
 	}
 
 	public TestSubject removeIntolerance(String intolerance){
-		this.intolerances.removeIf(n ->(n == intolerance));
+		this.intolerances.removeIf(n ->(n.equalsIgnoreCase(intolerance)));
 		return this;
 
 	}
