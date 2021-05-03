@@ -18,7 +18,7 @@ public class Date implements Serializable {
 	
 	@Override
 	public String toString() {
-		return getYear() + "-" + getMonth() + "-" + getDay();
+		return getDay() + "." + getMonth() + "." + getYear();
 	}
 
 	@Override

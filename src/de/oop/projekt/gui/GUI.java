@@ -5,134 +5,147 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 
 import de.oop.projekt.main.*;
 
 
-public class GUI implements ActionListener {
+public class GUI extends JPanel implements ActionListener {
 
-    Study myStudy = Study.getInstance();
+    //startRegion attributes: main frame and its panels
+    private final JFrame mainFrame = new JFrame();
+    private final JPanel rootPanel = new JPanel(new CardLayout());
+    private final JPanel startpagePanel = new JPanel();
+    private final JPanel newTestSubjectPanel = new JPanel();
+    private final JPanel newDoctorPanel = new JPanel();
+    private final JPanel personView = new JPanel();
+    private final JPanel searchPanel = new JPanel();
+    private final JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, startpagePanel, rootPanel);
+    //endRegion attributes: main frame and its panels
 
+    //startRegion attributes: input-fields with matching labels
+    private final JLabel genderLbl = new JLabel("Geschlecht");
+    private final JLabel nameTitleLbl = new JLabel("Titel");
+    private final JTextField preTitle = new JTextField();
+    private final JLabel firstNameLbl = new JLabel("Vorname");
+    private final JTextField firstName = new JTextField();
+    private final JLabel lastNameLbl = new JLabel("Nachname");
+    private final JTextField lastName = new JTextField();
+    private final JLabel dateOfBirthLbl = new JLabel("Geburtstag (dd.mm.yyyy):");
+    private final JTextField dateOfBirthInput = new JTextField();
+    private final JLabel postTitleLbl = new JLabel("Doktorgrad etc.");
+    private final JTextField postTitle = new JTextField();
+    private final JLabel specialtyLbl = new JLabel("Fachgebiet");
+    private final JTextField specialty = new JTextField();
+    private final JLabel dateOfEntryLbl = new JLabel("Eintrittsdatum");
+    private final JTextField dateOfEntryInput = new JTextField();
+    private final JLabel searchInformationLbl = new JLabel("Hier Suchkriterium eingeben:");
+    private final JTextField searchCriteria = new JTextField();
+    //endRegion attributes: input-fields with matching labels
+
+    //startRegion attributes: lables for informations and textual representations of saved objects
+    private final JLabel infoLblStartpage = new JLabel();
+    private final JLabel errorLbl = new JLabel();
+    private final JLabel personString = new JLabel();
+    private final JLabel doctorString = new JLabel();
+    private final JLabel errorLblEdit = new JLabel();
+    //endRegion attributes: lables for informations and textual representations of saved objects
+
+    //startRegion attributes: regular Buttons
+    private final JButton switchToSearch = new JButton("Nach Personen suchen");
+    private final JButton searchButton = new JButton("Suche starten");
+    private final JButton newTestSubjectButton = new JButton("Neue Testperson erstellen");
+    private final JButton testSubjectSaveButton = new JButton("Testperson speichern");
+    private final JButton editButtonTestSubject = new JButton("Testperson bearbeiten");
+    private final JButton deleteButtonTestSubject = new JButton("Testperson löschen");
+    private final JButton newDoctorButton = new JButton("Neuen Arzt erstellen");
+    private final JButton doctorSaveButton = new JButton("Arzt speichern");
+    private final JButton editButtonDoctor = new JButton("Arzt bearbeiten");
+    private final JButton deleteButtonDoctor = new JButton("Arzt löschen");
+    private final JButton exportButton = new JButton("Exportieren");
+    //endRegion attributes: regular Buttons
+
+    //startRegion attributes: RadioButtons and their groups
+    private final JRadioButton male = new JRadioButton("männlich");
+    private final JRadioButton female = new JRadioButton("weiblich");
+    private final JRadioButton divers = new JRadioButton("divers");
+    private final JRadioButton selectDoctor = new JRadioButton("Ärzte durchsuchen");
+    private final JRadioButton selectTestSubject = new JRadioButton("Testpersonen durchsuchen");
+    private final JRadioButton searchForLastname = new JRadioButton("Nachname");
+    private final JRadioButton searchForDate = new JRadioButton("Geburtsdatum (Format: dd.mm.jjjj)");
+    private final JRadioButton searchForID = new JRadioButton("ID");
+    private final ButtonGroup searchButtonsGroup = new ButtonGroup();
+    private final ButtonGroup searchValueButtonsGroup = new ButtonGroup();
+    private final ButtonGroup genderButtonGroup = new ButtonGroup();
+    //endRegion attributes: RadioButtons and their groups
+
+    //startRegion attributes: items for menu
+    private final JMenuBar menubar = new JMenuBar();
+    private final JMenu file = new JMenu("Datei");
+    private final JMenu edit = new JMenu("Bearbeiten");
+    private final JMenu help = new JMenu("Hilfe");
+    private final JMenuItem newStudy = new JMenuItem("Neu");
+    private final JMenuItem save = new JMenuItem("Speichern");
+    private final JMenuItem saveAs = new JMenuItem("Speichern unter");
+    private final JMenuItem importStudy = new JMenuItem("Importieren");
+    private final JMenuItem changeTitle = new JMenuItem("Namen der Studie ändern");
+    private final JMenuItem exit = new JMenuItem("Exit");
+    //endRegion attributes: items for menu
+    private final List<JButton> buttonListMultipleSubjectsEdit = new ArrayList<>();
+    private final List<JButton> buttonListMultipleSubjectsDelete = new ArrayList<>();
+    private final List<JButton> buttonListMultipleDoctorsEdit = new ArrayList<>();
+    private final List<JButton> buttonListMultipleDoctorsDelete = new ArrayList<>();
+    //startRegion attributes: multiple variables for temporary savings in runtime
     private TestSubject tS;
-    private String prevPanel;
     private Doctor doc;
     private boolean editing = false;
-    JMenuItem exit = new JMenuItem("Exit");
-    JMenuItem changeTitle = new JMenuItem("Namen der Studie ändern");
-    JMenuItem save = new JMenuItem("Speichern");
-    private List<JButton> buttonListMultipleSubjectsEdit = new ArrayList<>();
-    private List<JButton> buttonListMultipleSubjectsDelete = new ArrayList<>();
-    private List<JButton> buttonListMultipleDoctorsEdit = new ArrayList<>();
-    private List<JButton> buttonListMultipleDoctorsDelete = new ArrayList<>();
-    private List<TestSubject> resultsTestSubjects;
-    private List<Doctor> resultsDoctor;
-    private JButton newTestSubjectButton = new JButton("Neue Person erstellen");
-    private JButton newDoctorButton = new JButton("Neuen Arzt erstellen");
-    private JButton testSubjectSaveButton = new JButton("Testperson speichern");
-    private JButton doctorSaveButton = new JButton("Arzt speichern");
-    private JButton exportButton = new JButton("Exportieren");
-    private JFrame mainFrame = new JFrame();
-
-    private JPanel startpagePanel = new JPanel();
-    private JPanel newTestSubjectPanel = new JPanel();
-    private JPanel newDoctorPanel = new JPanel();
-    private JPanel rootPanel = new JPanel(new CardLayout());
-    private JPanel personView = new JPanel();
-    private JButton switchToSearch = new JButton("Suchen");
-    private JButton searchButton = new JButton("Suchen");
-    private JButton editButtonTestSubject = new JButton("Testperson bearbeiten");
-    private JButton editButtonDoctor = new JButton("Arzt bearbeiten");
-    private JButton deleteButtonTestSubject = new JButton("Testperson löschen");
-    private JButton deleteButtonDoctor = new JButton("Arzt löschen");
-
-    private JSplitPane splitPane;
-
-    private JMenuItem importStudy = new JMenuItem("Importieren");
-    private ButtonGroup searchButtonsGroup = new ButtonGroup();
-    private ButtonGroup searchValueButtonsGroup = new ButtonGroup();
-    private ButtonGroup genderButtonGroup = new ButtonGroup();
-    private JRadioButton male = new JRadioButton("männlich");
-    private JRadioButton female = new JRadioButton("weiblich");
-    private JRadioButton divers = new JRadioButton("divers");
-    private JRadioButton selectDoctor = new JRadioButton("Ärzte durchsuchen");
-    private JRadioButton selectTestSubject = new JRadioButton("Testpersonen durchsuchen");
-    private JRadioButton searchForLastname = new JRadioButton("Nachname");
-    private JRadioButton searchForDate = new JRadioButton("Geburtsdatum (Format: dd.mm.jjjj)");
-    private JRadioButton searchForID = new JRadioButton("ID");
-    private JMenuBar menubar = new JMenuBar();
-    private JLabel genderLbl = new JLabel("Geschlecht");
-    private JLabel nameTitleLbl = new JLabel("Titel:");
-    private JTextField preTitle = new JTextField();
-    private JLabel firstNameLbl = new JLabel("Vorname:");
-    private JTextField firstName = new JTextField();
-    private JLabel lastNameLbl = new JLabel("Nachname:");
-    private JTextField lastName = new JTextField();
-    private JLabel birthdateDescription = new JLabel("Geburtstag (dd.mm.yyyy):");
-    private JLabel birthdateDayLbl = new JLabel("Tag:");
-    private JTextField birthdateDay = new JTextField();
-    private JLabel birthdateMonthLbl = new JLabel("Monat:");
-    private JTextField birthdateMonth = new JTextField();
-    private JLabel birthdateYearLbl = new JLabel("Jahr:");
-    private JTextField birthdateYear = new JTextField();
-    private JLabel postTitleLbl = new JLabel("Doktorgrad etc.");
-    private JTextField postTitle = new JTextField();
-    private JLabel specialtyLbl = new JLabel("Fachgebiet");
-    private JTextField specialty = new JTextField();
-    private JLabel errorLbl = new JLabel();
-    private JPanel searchPanel = new JPanel();
-    private JLabel searchInformationLbl = new JLabel("Hier Suchkriterium eingeben:");
-    private JTextField searchCriteria = new JTextField();
-    private JLabel personString = new JLabel();
-    private JLabel doctorString = new JLabel();
-    private JLabel errorLblEdit = new JLabel();
-    private JLabel infoLblImport = new JLabel();
-
-    private void setEditing(boolean b) {
-        editing = b;
-    }
-
-    private boolean getEditing() {
-        return editing;
-    }
-
-    public String getPrevPanel() {
-        return prevPanel;
-    }
-
-    public GUI setPrevPanel(String prevPanel) {
-        this.prevPanel = prevPanel;
-        return this;
-    }
+    private List<TestSubject> resultsTestSubjects = new ArrayList<>();
+    private List<Doctor> resultsDoctor = new ArrayList<>();
+    //endRegion attributes: multiple variables for temporary savings in runtime
 
     public GUI() {
         initialSetup();
 
         mainFrame.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent we) {
-
-                Object[] options = {"Nein, abbrechen", "Ja, nicht speichern und schließen"};
-
-                if (Study.getInstance().isChangesNotSaved()) {
-                    int result = JOptionPane.showOptionDialog(mainFrame,
-                            "Es gibt ungespeicherte Änderungen. Möchten Sie das Programm wirklich beenden?", "Achtung:",
-                            JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[0]);
-                    if (result == JOptionPane.NO_OPTION) {
-                        exportData();
-                        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                    } else if (result == JOptionPane.YES_OPTION) {
-                        mainFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-                    }
-                } else {
-                    exportData();
-                    mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                }
+                exitSession();
             }
-        }); // zu bearbeiten
+        }); //TODO: zu bearbeiten
 
-        importAtStart();
+        //importAtStart();
+    }
+
+    public static void main(String[] args) {
+        new GUI();
+    }
+
+    private void exitSession() {
+        Object[] options = {"Nein, abbrechen", "Ja, nicht speichern und schließen"};
+
+        if (Study.getInstance().isChangesNotSaved()) {
+            int result = JOptionPane.showOptionDialog(mainFrame,
+                    "Es gibt ungespeicherte Änderungen. Möchten Sie das Programm wirklich beenden?", "Achtung:",
+                    JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[0]);
+            if (result == JOptionPane.NO_OPTION) {
+                exportData();
+                mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            } else if (result == JOptionPane.YES_OPTION) {
+                mainFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+            }
+        } else {
+            exportData();
+            mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        }
+    }
+
+    private boolean getEditing() {
+        return editing;
+    }
+
+    private void setEditing(boolean b) {
+        editing = b;
     }
 
     void importAtStart() {
@@ -148,187 +161,195 @@ public class GUI implements ActionListener {
         Study.getInstance().getTestSubjectContainer().addTestSubjectToList(andrea);
         System.out.println(Study.getInstance().getTitle());
 
-
         try {
-//            Serializer.writeToFile(Study.getInstance());
+            Study.writeToFile();
             Study.readFromFile();
-            infoLblImport.setText("Import erfolgreich");
+            infoLblStartpage.setText("Import erfolgreich");
         } catch (IOException ioException) {
             System.out.println(ioException.getMessage());
             System.out.println(ioException.getCause());
             System.out.println(ioException.getLocalizedMessage());
-            infoLblImport.setText(ioException.getMessage());
+            infoLblStartpage.setText("<html>" + ioException.getMessage() + "<br/>" + ioException.getCause() + "<br/>" + ioException.getLocalizedMessage() + "</html>");
         } catch (ClassNotFoundException classNotFoundException) {
-            infoLblImport.setText(classNotFoundException.getMessage());
+            infoLblStartpage.setText(classNotFoundException.getMessage());
         }
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
 
-        if(e.getSource() == importStudy) {
+        if (e.getSource() == importStudy) {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.showDialog(null, "Ausgewählte Datei importieren");
             String filenameImport = fileChooser.getSelectedFile().getName();
 
             try {
-                Study.readFromFile();
-                infoLblImport.setText("Import erfolgreich");
+                Study.readFromFile(filenameImport);
+                infoLblStartpage.setText("Import erfolgreich");
                 Study.getInstance().setChangesNotSaved(false);
                 mainFrame.setTitle(Study.getInstance().getTitle());
             } catch (IOException ioException) {
-                infoLblImport.setText(ioException.getMessage());
+                infoLblStartpage.setText(ioException.getMessage());
             } catch (ClassNotFoundException classNotFoundException) {
-               infoLblImport.setText(classNotFoundException.getMessage());
+                infoLblStartpage.setText(classNotFoundException.getMessage());
             }
         }
 
-        if(e.getSource() == newTestSubjectButton) {
-            personFields();
+        if (e.getSource() == newTestSubjectButton) {
+            testSubjectFields();
             switchCards("newTestSubject");
         }
 
-        if(e.getSource() == exit) {
-            System.exit(0);
+        if (e.getSource() == exit) {
+            exitSession();
         }
 
-        if(e.getSource() == newDoctorButton) {
+        if (e.getSource() == newDoctorButton) {
             doctorFields();
             switchCards("newDoctor");
         }
 
-       if(e.getSource() == testSubjectSaveButton) {
-           saveTestSubject();
-       }
-        if(e.getSource() == doctorSaveButton) {
+        if (e.getSource() == testSubjectSaveButton) {
+            saveTestSubject();
+        }
+        if (e.getSource() == doctorSaveButton) {
             saveDoctor();
         }
 
-
-        if(e.getSource() == switchToSearch) {
+        if (e.getSource() == switchToSearch) {
             switchCards("search");
         }
 
-        if(e.getSource() == editButtonTestSubject) {
+        if (e.getSource() == editButtonTestSubject) {
             personView.removeAll();
             tS = resultsTestSubjects.get(0);
             editViewTestSubject(resultsTestSubjects.get(0));
         }
 
-        if(e.getSource() == editButtonDoctor) {
+        if (e.getSource() == editButtonDoctor) {
             personView.removeAll();
             doc = resultsDoctor.get(0);
             editViewDoctor(resultsDoctor.get(0));
         }
 
-        if(e.getSource() == deleteButtonTestSubject) {
+        if (e.getSource() == deleteButtonTestSubject) {
             deletePerson(resultsTestSubjects.get(0));
         }
 
-        if(e.getSource() == deleteButtonDoctor) {
+        if (e.getSource() == deleteButtonDoctor) {
             deleteDoctor(resultsDoctor.get(0));
         }
 
         for (int i = 0; i < buttonListMultipleSubjectsEdit.size(); i++) {
-            if(e.getSource() == buttonListMultipleSubjectsEdit.get(i)) {
+            if (e.getSource() == buttonListMultipleSubjectsEdit.get(i)) {
                 tS = resultsTestSubjects.get(i);
                 editViewTestSubject(resultsTestSubjects.get(i));
             }
         }
 
         for (int i = 0; i < buttonListMultipleSubjectsDelete.size(); i++) {
-            if(e.getSource() == buttonListMultipleSubjectsDelete.get(i)) {
+            if (e.getSource() == buttonListMultipleSubjectsDelete.get(i)) {
                 deletePerson(resultsTestSubjects.get(i));
                 switchCards("search");
             }
         }
 
         for (int i = 0; i < buttonListMultipleDoctorsEdit.size(); i++) {
-            if(e.getSource() == buttonListMultipleDoctorsEdit.get(i)) {
+            if (e.getSource() == buttonListMultipleDoctorsEdit.get(i)) {
                 doc = resultsDoctor.get(i);
                 editViewDoctor(resultsDoctor.get(i));
             }
         }
 
         for (int i = 0; i < buttonListMultipleDoctorsDelete.size(); i++) {
-            if(e.getSource() == buttonListMultipleDoctorsDelete.get(i)) {
+            if (e.getSource() == buttonListMultipleDoctorsDelete.get(i)) {
                 deleteDoctor(resultsDoctor.get(i));
             }
         }
 
-        if(e.getSource() == changeTitle) {
+        if (e.getSource() == changeTitle) {
             String newTitle = JOptionPane.showInputDialog(mainFrame,
                     "Neuen Titel für die Studie eingeben",
                     null);
-            System.out.println(newTitle);
-            
-            if(newTitle != null && newTitle != "") {
+            if (newTitle != null && newTitle != "") {
                 Study.getInstance().setTitle(newTitle);
                 mainFrame.setTitle(Study.getInstance().getTitle());
-
             }
-
         }
 
-        if(e.getSource() == searchButton) {
+        if (e.getSource() == searchButton) {
 
-            if(searchForLastname.isSelected()) {
-                if(selectTestSubject.isSelected()) {
-                   resultsTestSubjects = Study.getInstance().getTestSubjectContainer().searchTestSubjectByLastName(searchCriteria.getText());
-                   testSubjectSearchListing();
-                } else if(selectDoctor.isSelected()) {
-//                    resultsDoctor = Study.getInstance().getDoctorContainer().searchDoctorByLastName(searchCriteria.getText());
-                doctorSearchListing();
+            if (searchForLastname.isSelected()) {
+                if (selectTestSubject.isSelected()) {
+                    listSearchResultsTestSubjects(Study.getInstance().getTestSubjectContainer().searchTestSubject(searchCriteria.getText()));
+                } else if (selectDoctor.isSelected()) {
+                    listSearchResultsDoctors(Study.getInstance().getDoctorContainer().searchDoctor(searchCriteria.getText()));
                 }
-            } else if(searchForDate.isSelected()) {
-                Date searchDate = stringToDate(searchCriteria.getText());
-                if(selectTestSubject.isSelected()) {
-                    resultsTestSubjects = Study.getInstance().getTestSubjectContainer().searchTestSubjectByDateOfBirth(searchDate);
-                    testSubjectSearchListing();
-
-                } else if(selectDoctor.isSelected()) {
-//                    resultsDoctor = Study.getInstance().getDoctorContainer().searchDoctorByDateOfBirth(searchDate);
-                    doctorSearchListing();
+            } else if (searchForDate.isSelected()) {
+                Date searchDate = Helper.stringToDate(searchCriteria.getText());
+                if (selectTestSubject.isSelected()) {
+                    listSearchResultsTestSubjects(Study.getInstance().getTestSubjectContainer().searchTestSubject(searchDate));
+                } else if (selectDoctor.isSelected()) {
+                    listSearchResultsDoctors(Study.getInstance().getDoctorContainer().searchDoctor(searchDate));
                 }
-            } else if(searchForID.isSelected()) {
-                if(selectTestSubject.isSelected()) {
-                    resultsTestSubjects = Study.getInstance().getTestSubjectContainer().searchTestSubjectByID(searchCriteria.getText());
-                    testSubjectSearchListing();
-                } else if(selectDoctor.isSelected()) {
-//                    resultsDoctor = Study.getInstance().getDoctorContainer().searchDoctorByID(searchCriteria.getText());
-                    doctorSearchListing();
+            } else if (searchForID.isSelected()) {
+                if (selectTestSubject.isSelected()) {
+                    listSearchResultsTestSubjects(Study.getInstance().getTestSubjectContainer().searchTestSubject(UUID.fromString(searchCriteria.getText())));
+                } else if (selectDoctor.isSelected()) {
+                    listSearchResultsDoctors(Study.getInstance().getDoctorContainer().searchDoctor(UUID.fromString(searchCriteria.getText())));
                 }
             }
-
         }
-
-        if(e.getSource() != importStudy) {
-            infoLblImport.setText("");
+        if (e.getSource() != importStudy) {
+            infoLblStartpage.setText("");
         }
-
-        if(e.getSource() == save) {
+        if (e.getSource() == save) {
             exportData();
         }
+        if (e.getSource() == saveAs) {
+            Object[] options = {"Abbrechen", "Speichernn"};
 
-    }
-
-    private Date stringToDate(String dateAsString) {
-        //turns string from user-input to Date
-        //If user-input is not a valid format, default Date 1.1.1970 is returned
-        if(!FieldValidator.dateFieldValid(dateAsString)) {
-            return new Date(1,1,1970);
+            String customFilename = JOptionPane.showInputDialog(this, "Unter welchem Namen soll die Datei gespeichert werden?", Study.getInstance().getTitle());
+            if (!customFilename.isEmpty()) {
+                Study.setFilename(customFilename);
+            } else {
+                infoLblStartpage.setText("Dateiname ungültig");
+                return;
+            }
+            exportData();
+//            JFileChooser fileChooser = new JFileChooser();
+//            fileChooser.setCurrentDirectory(new java.io.File("."));
+//            fileChooser.setDialogTitle("Wo soll die Datei gespeichert werden?");
+//            fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+//            fileChooser.setAcceptAllFileFilterUsed(false);
+//            FileNameExtensionFilter filter = new FileNameExtensionFilter("Study files", "study", "Study-File");
+//            fileChooser.setFileFilter(filter);
+//            if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+//                System.out.println("getCurrentDirectory(): "
+//                        + fileChooser.getCurrentDirectory());
+//                System.out.println("getSelectedFile() : "
+//                        + fileChooser.getSelectedFile());
+//            } else {
+//                System.out.println("No Selection ");
+//            }
         }
-        String[] dateAsArray = dateAsString.split("\\.");
-        System.out.println(Arrays.toString(dateAsArray));
-        int day = Integer.parseInt(dateAsArray[0]);
-        int month = Integer.parseInt(dateAsArray[1]);
-        int year = Integer.parseInt(dateAsArray[2]);
-        return new Date(day, month, year);
-
+        if (e.getSource() == newStudy) {
+            //JOPTION PANE MIT ABFRAGE
+            clearFields();
+            infoLblStartpage.setText("");
+            errorLbl.setText("");
+            errorLblEdit.setText("");
+            Study.setFilename("Serialization.study");
+            Study.getInstance().setTitle("Medizinische Studie");
+            Study.getInstance().setChangesNotSaved(false);
+            Study.getInstance().getTestSubjectContainer().getTestSubjectList().clear();
+            Study.getInstance().getDoctorContainer().getDoctorList().clear();
+        }
     }
+
     private void testSubjectSearchListing() {
-        if(resultsTestSubjects != null && resultsTestSubjects.size() != 0) {
-            searchResultsTestSubjects(resultsTestSubjects);
+        if (resultsTestSubjects != null && resultsTestSubjects.size() != 0) {
+            listSearchResultsTestSubjects(resultsTestSubjects);
         } else {
             errorLblEdit.setText("Keine Person gefunden!");
         }
@@ -336,33 +357,25 @@ public class GUI implements ActionListener {
 
     private void doctorSearchListing() {
 
-        if (resultsDoctor != null && resultsDoctor.size() != 0) {
-            searchResultsDoctors(resultsDoctor);
-        } else {
-            errorLblEdit.setText("Kein Arzt gefunden!");
-        }
-
     }
 
     private void deletePerson(TestSubject t) {
         Study.getInstance().getTestSubjectContainer().removeTestSubjectFromList(t);
         switchCards("startpage");
-        infoLblImport.setText("Person erfolgreich gelöscht");
+        infoLblStartpage.setText("Person erfolgreich gelöscht");
     }
 
     private void deleteDoctor(Doctor d) {
         Study.getInstance().getDoctorContainer().removeDoctorFromList(d);
         switchCards("startpage");
-        infoLblImport.setText("Arzt erfolgreich gelöscht");
+        infoLblStartpage.setText("Arzt erfolgreich gelöscht");
     }
 
     private void editViewTestSubject(TestSubject t) {
-        personFields();
+        testSubjectFields();
         firstName.setText(t.getFirstName());
         lastName.setText(t.getLastName());
-        birthdateDay.setText(String.valueOf(t.getDateOfBirth().getDay()));
-        birthdateMonth.setText(String.valueOf(t.getDateOfBirth().getMonth()));
-        birthdateYear.setText(String.valueOf(t.getDateOfBirth().getYear()));
+        dateOfBirthInput.setText(t.getDateOfBirth().toString());
         setEditing(true);
         switchCards("newTestSubject");
     }
@@ -372,17 +385,19 @@ public class GUI implements ActionListener {
         firstName.setText(d.getFirstName());
         lastName.setText(d.getLastName());
         preTitle.setText(d.getPreTitle());
-        birthdateDay.setText(String.valueOf(d.getDateOfBirth().getDay()));
-        birthdateMonth.setText(String.valueOf(d.getDateOfBirth().getMonth()));
-        birthdateYear.setText(String.valueOf(d.getDateOfBirth().getYear()));
+        dateOfBirthInput.setText(d.getDateOfBirth().toString());
+        dateOfEntryInput.setText(d.getDateOfEntry().toString());
         postTitle.setText(d.getPostTitle());
         specialty.setText(d.getSpecialty());
         setEditing(true);
         switchCards("personView");
     }
 
-
-    private void searchResultsTestSubjects(List<TestSubject> list) {
+    private void listSearchResultsTestSubjects(List<TestSubject> list) {
+        if (list == null || list.size() == 0) {
+            errorLblEdit.setText("Keine Person gefunden!");
+            return;
+        }
         personView.removeAll();
         if (list.size() > 1) {
             for (int i = 0; i < list.size(); i++) {
@@ -395,7 +410,7 @@ public class GUI implements ActionListener {
                 personView.add(buttonListMultipleSubjectsEdit.get(i));
                 personView.add(buttonListMultipleSubjectsDelete.get(i));
             }
-        } else if (list.size() == 1){
+        } else if (list.size() == 1) {
             personString.setText(list.get(0).toString());
             personView.add(personString);
             personView.add(editButtonTestSubject);
@@ -406,7 +421,11 @@ public class GUI implements ActionListener {
         switchCards("personView");
     }
 
-    private void searchResultsDoctors(List<Doctor> list) {
+    private void listSearchResultsDoctors(List<Doctor> list) {
+        if (list == null || list.size() == 0) {
+            errorLblEdit.setText("Kein Arzt gefunden!");
+            return;
+        }
         personView.removeAll();
         if (list.size() > 1) {
             for (int i = 0; i < list.size(); i++) {
@@ -418,8 +437,6 @@ public class GUI implements ActionListener {
                 buttonListMultipleDoctorsDelete.get(i).addActionListener(this);
                 personView.add(buttonListMultipleDoctorsEdit.get(i));
                 personView.add(buttonListMultipleDoctorsDelete.get(i));
-
-
             }
         } else if (list.size() == 1) {
             doctorString.setText(list.get(0).toString());
@@ -433,7 +450,8 @@ public class GUI implements ActionListener {
         switchCards("personView");
     }
 
-    private void personFields(){
+    //removes all objects from panel and adds them new -> TestSubject
+    private void testSubjectFields() {
         newTestSubjectPanel.removeAll();
         newTestSubjectPanel.add(genderLbl);
         newTestSubjectPanel.add(male);
@@ -443,26 +461,17 @@ public class GUI implements ActionListener {
         newTestSubjectPanel.add(firstName);
         newTestSubjectPanel.add(lastNameLbl);
         newTestSubjectPanel.add(lastName);
-        newTestSubjectPanel.add(birthdateDescription);
-        newTestSubjectPanel.add(birthdateDayLbl);
-        newTestSubjectPanel.add(birthdateDay);
-        newTestSubjectPanel.add(birthdateMonthLbl);
-        newTestSubjectPanel.add(birthdateMonth);
-        newTestSubjectPanel.add(birthdateYearLbl);
-        newTestSubjectPanel.add(birthdateYear);
+        newTestSubjectPanel.add(dateOfBirthLbl);
+        newTestSubjectPanel.add(dateOfBirthInput);
         newTestSubjectPanel.add(errorLbl);
         newTestSubjectPanel.add(testSubjectSaveButton);
-
         genderButtonGroup.clearSelection();
-        firstName.setText("");
-        lastName.setText("");
-        birthdateDay.setText("");
-        birthdateMonth.setText("");
-        birthdateYear.setText("");
+        //clears all the fields from the panel
+        clearFields();
         errorLbl.setText("");
-
     }
 
+    //removes all objects from panel and adds them new -> Doctor
     private void doctorFields() {
         newDoctorPanel.removeAll();
         newDoctorPanel.add(genderLbl);
@@ -477,30 +486,20 @@ public class GUI implements ActionListener {
         newDoctorPanel.add(lastName);
         newDoctorPanel.add(postTitleLbl);
         newDoctorPanel.add(postTitle);
-        newDoctorPanel.add(birthdateDescription);
-        newDoctorPanel.add(birthdateDayLbl);
-        newDoctorPanel.add(birthdateDay);
-        newDoctorPanel.add(birthdateMonthLbl);
-        newDoctorPanel.add(birthdateMonth);
-        newDoctorPanel.add(birthdateYearLbl);
-        newDoctorPanel.add(birthdateYear);
+        newDoctorPanel.add(dateOfBirthLbl);
+        newDoctorPanel.add(dateOfBirthInput);
         newDoctorPanel.add(specialtyLbl);
         newDoctorPanel.add(specialty);
+        newDoctorPanel.add(dateOfEntryLbl);
+        newDoctorPanel.add(dateOfEntryInput);
         newDoctorPanel.add(errorLbl);
         newDoctorPanel.add(doctorSaveButton);
-
-        preTitle.setText("");
-        firstName.setText("");
-        lastName.setText("");
-        postTitle.setText("");
-        birthdateDay.setText("");
-        birthdateMonth.setText("");
-        birthdateYear.setText("");
-        specialty.setText("");
+        //clears all the fields on the panel
+        clearDoctorFields();
         errorLbl.setText("");
-
     }
 
+    //method for switching through the different panels
     private void switchCards(String newCard) {
         CardLayout cards = (CardLayout) rootPanel.getLayout();
         cards.show(rootPanel, newCard);
@@ -508,49 +507,43 @@ public class GUI implements ActionListener {
     }
 
     private void saveTestSubject() {
-        if (!checkDateFields()) {
+        if (!Helper.dateFieldValid(dateOfBirthInput.getText())) {
+            errorLbl.setText("Geburtsdatum ungültig");
             return;
         }
         String gender = "";
-        if(male.isSelected()) {
+        if (male.isSelected()) {
             gender = "male";
-        } else if(female.isSelected()) {
+        } else if (female.isSelected()) {
             gender = "female";
-        } else if(divers.isSelected()) {
+        } else if (divers.isSelected()) {
             gender = "divers";
         }
-        int day = Integer.parseInt(birthdateDay.getText());
-        int month = Integer.parseInt(birthdateMonth.getText());
-        int year = Integer.parseInt(birthdateYear.getText());
-        Date birthdate = new Date(day, month, year);
+
+        Date dateOfBirth = Helper.stringToDate(dateOfBirthInput.getText());
         if (getEditing()) {
-            tS.setDateOfBirth(birthdate);
+            tS.setDateOfBirth(dateOfBirth);
             tS.setFirstName(firstName.getText());
             tS.setLastName(lastName.getText());
             errorLbl.setText("Testperson erfolgreich geändert");
             tS = null;
             setEditing(false);
+            Study.getInstance().setChangesNotSaved(true);
 
         } else {
-            TestSubject newPerson = new TestSubject(firstName.getText(), lastName.getText(), birthdate, gender);
+            TestSubject newPerson = new TestSubject(firstName.getText(), lastName.getText(), dateOfBirth, gender);
             if (Study.getInstance().getTestSubjectContainer().addTestSubjectToList(newPerson)) {
                 errorLbl.setText("Testperson erfolgreich hinzugefügt");
-
+                clearFields();
             }
-
         }
-        firstName.setText("");
-        lastName.setText("");
-        birthdateDay.setText("");
-        birthdateMonth.setText("");
-        birthdateYear.setText("");
-        genderButtonGroup.clearSelection();
+
     }
 
     private boolean exportData() {
-
         try {
             Study.writeToFile();
+            infoLblStartpage.setText("<html>Export erfolgreich<br/>Dateiname: " + Study.getFilename() + "</html>");
             return true;
         } catch (IOException e) {
             e.printStackTrace();
@@ -558,109 +551,102 @@ public class GUI implements ActionListener {
         }
     }
 
-    private boolean checkDateFields() {
-
-        if (!FieldValidator.intFieldValid(birthdateDay.getText())) {
-            errorLbl.setText("Tag des Geburtsdatums ungültig");
-            return false;
-        }
-        if (!FieldValidator.intFieldValid(birthdateMonth.getText())) {
-            errorLbl.setText("Monat des Geburtsdatums ungültig");
-            return false;
-        }
-        if (!FieldValidator.intFieldValid(birthdateYear.getText())) {
-            errorLbl.setText("Jahr des Geburtsdatums ungültig");
-            return false;
-        }
-
-
-        return true;
-
-    }
-
-
-
     private void saveDoctor() {
-        if (!checkDateFields()) {
+        if (!Helper.dateFieldValid(dateOfBirthInput.getText())) {
+            errorLbl.setText("Geburtsdatum ungültig");
             return;
         }
-
         String gender = "";
-        if(male.isSelected()) {
+        if (male.isSelected()) {
             gender = "male";
-        } else if(female.isSelected()) {
+        } else if (female.isSelected()) {
             gender = "female";
-        } else if(divers.isSelected()) {
+        } else if (divers.isSelected()) {
             gender = "divers";
         }
-        int day = Integer.parseInt(birthdateDay.getText());
-        int month = Integer.parseInt(birthdateMonth.getText());
-        int year = Integer.parseInt(birthdateYear.getText());
-        Date birthdate = new Date(day, month, year);
-        if(!getEditing()) {
 
-            Doctor newDoctor = new Doctor(preTitle.getText(), firstName.getText(), lastName.getText(), postTitle.getText(), birthdate, specialty.getText(), gender);
+        Date dateOfBirth = Helper.stringToDate(dateOfBirthInput.getText());
+        Date dateOfEntry = Helper.stringToDate(dateOfEntryLbl.getText());
+
+        if (!getEditing()) {
+            Doctor newDoctor = new Doctor(preTitle.getText(), firstName.getText(), lastName.getText(), postTitle.getText(), dateOfBirth, specialty.getText(), gender, dateOfEntry);
             if (Study.getInstance().getDoctorContainer().addDoctorToList(newDoctor)) {
                 errorLbl.setText("Arzt erfolgreich hinzugefügt");
                 genderButtonGroup.clearSelection();
                 setEditing(false);
             }
         } else {
-            doc.setDateOfBirth(birthdate);
+            doc.setDateOfBirth(dateOfBirth);
             doc.setFirstName(firstName.getText());
             doc.setLastName(lastName.getText());
             doc.setPostTitle(postTitle.getText());
             doc.setSpecialty(specialty.getText());
             doc.setPreTitle(preTitle.getText());
+            doc.setDateOfEntry(dateOfEntry);
             errorLbl.setText("Arzt erfolgreich geändert");
             doc = null;
+            java.util.Date currentDate = new java.util.Date();
 
         }
+        clearDoctorFields();
+    }
+
+    private void clearFields() {
         firstName.setText("");
         lastName.setText("");
-        birthdateDay.setText("");
-        birthdateMonth.setText("");
-        birthdateYear.setText("");
+        dateOfBirthInput.setText("");
+        genderButtonGroup.clearSelection();
+
+    }
+
+    private void clearDoctorFields() {
+        clearFields();
         preTitle.setText("");
         postTitle.setText("");
         specialty.setText("");
     }
 
     private void setUpMenu() {
-        JMenu file = new JMenu("Datei");
-        JMenu edit = new JMenu("Bearbeiten");
-        JMenu help = new JMenu("Hilfe");
-
-
-        exit.addActionListener(this);
-        changeTitle.addActionListener(this);
+        //add action listeners and specified keystrokes to menu items
+        newStudy.addActionListener(this);
+        newStudy.setAccelerator(KeyStroke.getKeyStroke('N', Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
         save.addActionListener(this);
-        save.setMnemonic('S');
-
-
+        save.setAccelerator(KeyStroke.getKeyStroke('S', Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
+        saveAs.addActionListener(this);
+        saveAs.setAccelerator(KeyStroke.getKeyStroke('S', Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() + ActionEvent.SHIFT_MASK));
+        changeTitle.addActionListener(this);
+        changeTitle.setAccelerator(KeyStroke.getKeyStroke('U', Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
+        exit.addActionListener(this);
+        exit.setAccelerator(KeyStroke.getKeyStroke('Q', Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
+        //add menu items to menu category
+        file.add(newStudy);
         file.add(save);
+        file.add(saveAs);
         file.add(importStudy);
         file.add(exit);
-
         edit.add(changeTitle);
+        //add menu categories to menu bar
         menubar.add(file);
         menubar.add(edit);
         menubar.add(help);
-
     }
 
     private void initialSetup() {
         //called once at start of GUI
         System.setProperty("apple.laf.useScreenMenuBar", "true");
-        mainFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setUpMenu();
+        //startRegion set up radio button groups
         searchButtonsGroup.add(selectDoctor);
         searchButtonsGroup.add(selectTestSubject);
         genderButtonGroup.add(male);
         genderButtonGroup.add(female);
         genderButtonGroup.add(divers);
+        searchValueButtonsGroup.add(searchForLastname);
+        searchValueButtonsGroup.add(searchForDate);
+        searchValueButtonsGroup.add(searchForID);
+        //endRegion set up radio button groups
 
-
-        //region set Layouts for different panels
+        //startRegion set Layouts for different panels
         startpagePanel.setBorder(BorderFactory.createEmptyBorder(30, 30, 10, 30));
         startpagePanel.setLayout(new GridLayout(0, 1));
         newTestSubjectPanel.setBorder(BorderFactory.createEmptyBorder(30, 30, 10, 30));
@@ -671,10 +657,9 @@ public class GUI implements ActionListener {
         searchPanel.setLayout(new GridLayout(0, 1));
         personView.setBorder(BorderFactory.createEmptyBorder(30, 30, 10, 30));
         personView.setLayout(new GridLayout(0, 1));
-        //endregion
+        //endRegion set Layouts for different panels
 
-
-        //region add ActionListeners to all buttons
+        //startRegion add ActionListeners to all buttons
         newTestSubjectButton.addActionListener(this);
         newDoctorButton.addActionListener(this);
         switchToSearch.addActionListener(this);
@@ -687,61 +672,37 @@ public class GUI implements ActionListener {
         importStudy.addActionListener(this);
         deleteButtonTestSubject.addActionListener(this);
         deleteButtonDoctor.addActionListener(this);
+        //endRegion add ActionListeners to all buttons
 
-        //endregion
-
-        searchValueButtonsGroup.add(searchForLastname);
-        searchValueButtonsGroup.add(searchForDate);
-        searchValueButtonsGroup.add(searchForID);
-
-
-
-
-        //RadioButton for search
-        searchPanel.add(selectDoctor); //Group 1
-        searchPanel.add(selectTestSubject); //Group 1
-        searchPanel.add(searchForLastname); //Group 2
-        searchPanel.add(searchForDate); //Group 2
-        searchPanel.add(searchForID); //Group 2
+        //startRegion prepare panels and the greater frame
         searchPanel.add(searchInformationLbl);
         searchPanel.add(searchCriteria);
+        searchPanel.add(selectDoctor);
+        searchPanel.add(selectTestSubject);
+        searchPanel.add(searchForLastname);
+        searchPanel.add(searchForDate);
+        searchPanel.add(searchForID);
         searchPanel.add(errorLblEdit);
         searchPanel.add(searchButton);
-
         startpagePanel.add(newTestSubjectButton);
         startpagePanel.add(newDoctorButton);
         startpagePanel.add(switchToSearch);
-        startpagePanel.add(importStudy);
-        startpagePanel.add(infoLblImport);
-
-//        rootPanel.add(startpagePanel, "startpage");
+        startpagePanel.add(infoLblStartpage);
         rootPanel.add(new JPanel(), "start");
         rootPanel.add(newTestSubjectPanel, "newTestSubject");
         rootPanel.add(newDoctorPanel, "newDoctor");
         rootPanel.add(searchPanel, "search");
         rootPanel.add(personView, "personView");
-
-        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-                startpagePanel, rootPanel);
-
-
-
         mainFrame.add(splitPane, BorderLayout.CENTER);
-//        mainFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-
+        mainFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         mainFrame.setJMenuBar(menubar);
-        setUpMenu();
-
         mainFrame.setTitle(Study.getInstance().getTitle());
         mainFrame.pack();
-
         mainFrame.setVisible(true);
+        //endRegion prepare panels and the greater frame
 
         switchCards("startpage");
 
     }
 
-    public static void main(String[] args) {
-        new GUI();
-    }
 }

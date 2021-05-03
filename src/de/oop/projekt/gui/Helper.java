@@ -3,18 +3,34 @@ package de.oop.projekt.gui;
 
 import de.oop.projekt.main.*;
 
-public class FieldValidator {
+import java.util.Arrays;
+
+public class Helper {
 
     public static boolean intFieldValid(String text) {
         return text.matches("[0-9]+");
     }
 
     public static boolean dateFieldValid(String text) {
-        return text.matches("([0-9]{1,2})\\.([0-9]{2})\\.([0-9]{4})");
+        return text.matches("([0-9]{1,2})\\.([0-9]{1,2})\\.([0-9]{4})");
     }
 
     public static boolean nameFieldValid(String text) {
         return text != "";
+    }
+
+    public static Date stringToDate(String dateAsString) {
+        //turns string from user-input to Date
+        //if user-input is not a valid format, default Date 1.1.1970 is returned
+        if (!Helper.dateFieldValid(dateAsString)) {
+            return new Date(1, 1, 1970);
+        }
+        String[] dateAsArray = dateAsString.split("\\.");
+        System.out.println(Arrays.toString(dateAsArray));
+        int day = Integer.parseInt(dateAsArray[0]);
+        int month = Integer.parseInt(dateAsArray[1]);
+        int year = Integer.parseInt(dateAsArray[2]);
+        return new Date(day, month, year);
     }
 
     public static void main(String[] args) {

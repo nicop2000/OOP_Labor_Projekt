@@ -6,7 +6,7 @@ import java.util.*;
 //@SuppressWarnings("unused")
 public class TestSubject extends Person {
 
-	private String testSubjectID = UUID.randomUUID().toString();
+	private UUID testSubjectID = UUID.randomUUID();
 
 
 	private List<String> intolerances = new ArrayList<>();
@@ -14,7 +14,7 @@ public class TestSubject extends Person {
 
 
 
-	public String getTestSubjectID(){
+	public UUID getTestSubjectID(){
 		return this.testSubjectID;
 	}
 

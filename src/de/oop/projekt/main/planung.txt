@@ -17,12 +17,12 @@ Alles auf Englisch umschreiben -> Nico CHECK
 
 Geschlecht-Enum -> Andrea
 
-TestpersonContainer fertigstellen -> Finn
+TestpersonContainer fertigstellen
     suchmethoden
         testperson date
         testperson id
 
-nach suchen mehrere personen angeben wenn mehrere vorhanden -> Finn & Nico
+nach suchen mehrere personen angeben wenn mehrere vorhanden -> Nico
 
 
 Field-Validator add new Persons
@@ -40,7 +40,7 @@ Dokumentation -> Finn
 
 Tests -> Nico
 
-final und private wo es geht (Überprüfen)
-Parameter auf private prüfen
+final und private wo es geht (Überprüfen) -> Finn
+Parameter auf private prüfen -> Finn
 
 !!!CODE KOMMENTIEREN!!!
